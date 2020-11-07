@@ -3,6 +3,7 @@ package coursera.fourth;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +17,9 @@ public final class TravelSalesmanProblem {
                 .map(e -> e.split(SPACE_REGEX)).map(e -> new Point(Double.parseDouble(e[0]), Double.parseDouble(e[1])))
                 .collect(Collectors.toList());
         final TravelSalesmanProblem tsp = new TravelSalesmanProblem();
-        double result = tsp.dynamicProgramming(points);
+        double result = tsp.factorial(points);
+        System.out.println(result);
+        result = tsp.dynamicProgramming(points);
         System.out.println(result);
         points = Files
                 .lines(new File("/Users/pavelpolubentcev/Downloads/nn.txt").toPath())
@@ -24,6 +27,29 @@ public final class TravelSalesmanProblem {
                 .collect(Collectors.toList());
         result = tsp.heuristic(points);
         System.out.println(result);
+    }
+
+    public double factorial(final List<Point> points) {
+        final List<Point> notVisited = new ArrayList<>(points);
+        notVisited.remove(0);
+        return factorial(points.get(0), points.get(0), notVisited, 0);
+    }
+
+    public double factorial(final Point src, final Point prev, final List<Point> notVisited, final double dist) {
+        if (notVisited.isEmpty()) {
+            return dist + dist(prev, src);
+        }
+        double min = Double.MAX_VALUE;
+        for (int i = 0, n = notVisited.size(); i < n; i++) {
+            final Point next = notVisited.get(i);
+            notVisited.remove(i);
+            final double tsp = factorial(src, next, notVisited, dist + dist(prev, next));
+            if (min > tsp) {
+                min = tsp;
+            }
+            notVisited.add(i, next);
+        }
+        return min;
     }
 
     public double dynamicProgramming(final List<Point> points) {
